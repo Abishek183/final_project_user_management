@@ -53,7 +53,7 @@ class UserService:
     async def create(cls, session: AsyncSession, user_data: Dict[str, str], email_service: EmailService) -> Optional[User]:
         try:
             role = None
-            if user_data['role']:
+            if 'role' in user_data and user_data['role'] is not None:
                 role = user_data['role']
             validated_data = UserCreate(**user_data).model_dump()
             existing_user = await cls.get_by_email(session, validated_data['email'])
