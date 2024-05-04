@@ -89,6 +89,25 @@ async def test_update_professional_status_allowed_test11(async_client, admin_use
     assert response.status_code == 200
     assert response.json()["is_professional"] == True
 
+async def test_update_user_self_update_not_allowed_test12(async_client, admin_user, admin_token):
+    updated_data = {"first_name": "Test", "last_name": "User"}
+    response = await async_client.put("/users/updateMyProfile", json=updated_data)
+    assert response.status_code == 401
+
+async def test_update_user_self_update_not_allowed_test13(async_client, verified_user, verified_token):
+    updated_data = {"first_name": "Test", "last_name": "User"}
+    form_data = {
+        "username": verified_user.email,
+        "password": "MySuperPassword$1234"
+    }
+    response = await async_client.post("/login/", data=urlencode(form_data), headers={"Content-Type": "application/x-www-form-urlencoded"})
+    assert response.status_code == 200
+    token = response.json().get('access_token')
+    headers = {"Authorization": f"Bearer {token}"} 
+    response = await async_client.put("/users/updateMyProfile", json=updated_data, headers=headers)
+    assert response.status_code == 403
+
+
 @pytest.mark.asyncio
 async def test_delete_user(async_client, admin_user, admin_token):
     headers = {"Authorization": f"Bearer {admin_token}"}
