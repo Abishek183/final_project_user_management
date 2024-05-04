@@ -52,6 +52,7 @@ async def test_update_user_email_access_allowed(async_client, admin_user, admin_
     assert response.status_code == 200
     assert response.json()["email"] == updated_data["email"]
 
+
 @pytest.mark.asyncio
 async def test_update_user_email_access_Not_allowed_test2(async_client, admin_user, verified_user, admin_token):
     updated_data = {"email": f"updated_{admin_user.id}@example.com"}
@@ -67,6 +68,26 @@ async def test_update_user_email_access_allowed_test3(async_client, admin_user, 
     response = await async_client.put(f"/users/{admin_user.id}", json=updated_data, headers=headers)
     response = await async_client.put(f"/users/{admin_user.id}", json=updated_data, headers=headers)
     assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_update_professional_status_allowed_test8(async_client, admin_user, admin_token):
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await async_client.patch(f"/users/{admin_user.id}/upgrade",  headers=headers)
+    assert response.status_code == 200
+    assert response.json()["is_professional"] == True
+
+@pytest.mark.asyncio
+async def test_update_professional_status_not_allowed_test9(async_client, admin_user, user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    response = await async_client.patch(f"/users/{admin_user.id}/upgrade",  headers=headers)
+    assert response.status_code == 403
+
+@pytest.mark.asyncio
+async def test_update_professional_status_allowed_test11(async_client, admin_user, manager_token):
+    headers = {"Authorization": f"Bearer {manager_token}"}
+    response = await async_client.patch(f"/users/{admin_user.id}/upgrade",  headers=headers)
+    assert response.status_code == 200
+    assert response.json()["is_professional"] == True
 
 @pytest.mark.asyncio
 async def test_delete_user(async_client, admin_user, admin_token):
