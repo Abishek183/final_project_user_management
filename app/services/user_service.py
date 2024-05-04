@@ -207,3 +207,24 @@ class UserService:
             await session.commit()
             return True
         return False
+    
+    @classmethod
+    async def update_user(self, user_id, update_data):
+        user = await self.db.fetch_user(user_id)
+        if user:
+            user.update(update_data)
+            await self.db.commit()
+            return user
+        raise Exception("User not found")
+    
+    @classmethod
+    async def upgrade_to_professional(self, user_id):
+        user = await self.db.fetch_user(user_id)
+        if user:
+            user.is_professional = True
+            user.professional_status_updated_at = datetime.now()
+            await self.db.commit()
+            await EmailService.send_professional_upgrade_email(user.email)
+            return user
+        raise Exception("User not found")
+
