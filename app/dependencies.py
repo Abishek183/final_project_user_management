@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import Database
 from app.models.user_model import User
-from app.services.user_service import UserService
 from app.utils.template_manager import TemplateManager
 from app.services.email_service import EmailService
 from app.services.jwt_service import decode_token
@@ -73,5 +72,6 @@ async def get_current_active_user(token: str = Depends(oauth2_scheme), db: Async
     
     return user
 
-def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
+def get_user_service(db: AsyncSession = Depends(get_db)):
+    from app.services.user_service import UserService  # Import moved inside the function
     return UserService(db)

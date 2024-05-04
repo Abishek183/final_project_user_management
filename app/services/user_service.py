@@ -209,7 +209,7 @@ class UserService:
         return False
     
     @classmethod
-    async def update_user(self, user_id, update_data):
+    async def update_user(self, session: AsyncSession, user_id, update_data):
         user = await self.db.fetch_user(user_id)
         if user:
             user.update(update_data)
@@ -218,13 +218,17 @@ class UserService:
         raise Exception("User not found")
     
     @classmethod
-    async def upgrade_to_professional(self, user_id):
-        user = await self.db.fetch_user(user_id)
+    async def upgrade_to_professional(cls, session: AsyncSession, user_id: UUID, email_service: EmailService):
+        user = await cls.get_by_id(session, user_id)
+        email_flag = True
+        if user and user.is_professional == True:
+            email_flag = False
         if user:
             user.is_professional = True
             user.professional_status_updated_at = datetime.now()
-            await self.db.commit()
-            await EmailService.send_professional_upgrade_email(user.email)
+            await session.commit()
+            if email_flag == True:
+                await email_service.send_professional_upgrade_email(user.email)
             return user
-        raise Exception("User not found")
+        return None
 
